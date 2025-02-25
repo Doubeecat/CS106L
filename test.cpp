@@ -9,13 +9,36 @@ using namespace std;
 #define pll pair<ll,ll>
 #define mp make_pair
 
+void PrintStateBits(const istringstream &s) {
+    cout << (s.bad() ? "B" : "-");
+    cout << (s.good() ? "G" : "-");
+    cout << (s.fail() ? "F" : "-");
+    cout << (s.eof() ? "E" : "-");
+    cout << endl;
+}
 
-signed main() {
-    ostringstream oss("it's me",stringstream::ate);
-    cout << oss.str() << endl;
-    //it's me
-    oss << "888hi!";
-    cout << oss.str();
-    //it's me888hi!
+int StringToInterger(const string &s) {
+    int number;
+    istringstream iss(s);
+    PrintStateBits(iss);
+    iss >> number;
+    PrintStateBits(iss);
+    return number;
+}
+int main() {
+    int var1;
+    ifstream in("in.txt",ifstream::in);
+    ofstream out("out.txt",ofstream::out);
+    in >> var1;
+    out << var1;
     return 0;
 }
+
+/*
+1
+-G--
+---E
+12 2
+-G--
+-G--
+*/

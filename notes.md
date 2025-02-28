@@ -189,7 +189,29 @@ a
 
 注意，`cin` 如果读入失败了，这个时候 Fail bit 为 1，此后所有 `cin` 操作都倒闭了。
 
-我们也可以使用 `getline()` 代替运算符，这样我们就可以忽略空格读入一整行了，`getline` 是以换行符为分界，每次消耗掉一个换行符。主要作用在于确保我们可以清空缓存区，不会让我们读入变得差。
+我们也可以使用 `getline()` 代替运算符，这样我们就可以忽略空格读入一整行了，`getline` 是以换行符为分界，每次消耗掉一个换行符。主要作用在于确保我们可以清空缓存区，不会让我们读入变得差。使用方法也很简单： 
+
+```cpp
+cin >> str;
+//更改成 
+getline(cin,str);
+```
+
+`getline` 函数返回的是 `bool`，指示我们的操作是否成功。基于此我们可以写出一个新的更加完备的 `getInteger()`
+
+```cpp
+int getInterget() {
+    while (1) {
+        string line;
+        if (!getline(cin,line)) 
+            throw domain_error();
+        istringstream iss(line);
+        int res;char trash;
+        if (iss >> res && !(iss >> trash))
+            return res;
+    }
+}
+```
 
 对于与文件交互，我们使用 `ifstream` 和 `ofstream`
 
@@ -202,3 +224,37 @@ out << var1;
 ```
 
 这段代码实现了从 `in.txt` 中读入，并且输出到 `out.txt` 中。
+
+## 现代 C++ 类型
+
+### `size_t`
+在实际编码过程中，经常碰到对于 `size_t` 的 warnings。我们来深究一下这个东西。
+
+在调用 `std::.size()` 的时候我们得到的是一个 `size_t` 类型的无符号整数，它代表一个表示大小的变量，本质上是一个无符号整型。`size_t` 在不同的机器上有微小不同，提供了一种可以移植的方法来声明与系统中可寻址的内存区域一致的长度。
+
+在实际编码中，我们要小心 `arr.size() - 1` 这样的写法！当 `size() = 0` 的时候就会产生很多问题。
+
+### 类型别名
+
+我们可以使用 `using a = b;` 这样的语句来给 `b` 这个类型取一个 `a` 的别名。比如：
+
+```cpp
+using map_iter = unordered_map <forward_list<int>,unordered_set> :: const_iterator;
+
+map_iter begin = map1.cbegin();
+```
+
+最直接的应用就是 STL 库里的各种 `iterator` 和 `reference`。
+
+### `auto`
+
+自动推导，来点 C++ 笑话：
+
+```cpp
+auto f(string& a) {
+    auto b = a;
+    return b;
+}
+```
+
+比较需要注意的是，在 C++ 中尽量少用 C 风格字符串。在 lambda 函数，自动推导 `iterator`，定义 `templates` 中我们经常用到 auto.

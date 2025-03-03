@@ -105,7 +105,7 @@
  void write_courses_offered(std::vector<Course> &all_courses) {
    /* (STUDENT TODO) Your code goes here... */
 	std::vector <Course> rest_courses;
-    std::ofstream out("./student_output/cources_offered.csv",std::ofstream::out);
+    std::ofstream out(COURSES_OFFERED_PATH,std::ofstream::out);
 	out << "Title,Number of Units,Quarter\n";
 	for (auto [a,b,c] : all_courses) {
 		if (c != "null") {
@@ -131,7 +131,7 @@
   * @param unlisted_courses A vector of courses that are not offered.
   */
  void write_courses_not_offered(std::vector<Course> unlisted_courses) {
-    std::ofstream out("./student_output/cources_not_offered.csv",std::ofstream::out);
+    std::ofstream out(COURSES_NOT_OFFERED_PATH,std::ofstream::out);
 	out << "Title,Number of Units,Quarter\n";
 	for (auto [a,b,c] : unlisted_courses) {
 		out << a <<","<<b<<","<<c<<"\n";

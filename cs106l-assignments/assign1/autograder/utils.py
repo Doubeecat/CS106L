@@ -101,7 +101,7 @@ def _install_requirements():
 
 
 # Install autograder packages on import
-_install_requirements()
+# _install_requirements()
 
 # ==============================================================================
 # Imports

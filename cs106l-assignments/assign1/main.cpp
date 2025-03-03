@@ -66,20 +66,21 @@
    return number;
  }
  
- void parse_csv(std::string filename, std::vector<Course> courses) {
+ void parse_csv(std::string filename, std::vector<Course> &courses) {
    /* (STUDENT TODO) Your code goes here... */
    std::ifstream cs (filename);
    std::string str;
    getline(cs,str);
    while (getline(cs,str)) {
-     std::cerr << "line:" << str << "\n";
+    //  std::cerr << "line:" << str << "\n";
      std::vector<std::string> nowcourse = split(str,',');
      Course nowCourse;
-     for (auto x : nowcourse) std::cerr << x << "\n";
+    //  for (auto x : nowcourse) std::cerr << x << "\n";
      nowCourse.title = nowcourse[0];
      nowCourse.number_of_units = nowcourse[1];
      nowCourse.quarter = nowcourse[2];
-     std::cerr << "title:" << nowCourse.title << " number:" << nowCourse.number_of_units << " quarter:" << nowCourse.quarter << "\n";
+     courses.push_back(nowCourse);
+    //  std::cerr << "title:" << nowCourse.title << " number:" << nowCourse.number_of_units << " quarter:" << nowCourse.quarter << "\n";
    }
  }
  
@@ -101,9 +102,20 @@
   * @param all_courses A vector of all courses gotten by calling `parse_csv`.
   *                    This vector will be modified by removing all offered courses.
   */
- void write_courses_offered(std::vector<Course> all_courses) {
+ void write_courses_offered(std::vector<Course> &all_courses) {
    /* (STUDENT TODO) Your code goes here... */
- }
+	std::vector <Course> rest_courses;
+    std::ofstream out("./student_output/cources_offered.csv",std::ofstream::out);
+	out << "Title,Number of Units,Quarter\n";
+	for (auto [a,b,c] : all_courses) {
+		if (c != "null") {
+			out << a <<","<<b<<","<<c<<"\n";
+		} else {
+			rest_courses.push_back({a,b,c});
+		}
+	}
+	all_courses = rest_courses;
+}
  
  /**
   * This function writes the courses NOT offered to the file
@@ -119,7 +131,11 @@
   * @param unlisted_courses A vector of courses that are not offered.
   */
  void write_courses_not_offered(std::vector<Course> unlisted_courses) {
-   /* (STUDENT TODO) Your code goes here... */
+    std::ofstream out("./student_output/cources_not_offered.csv",std::ofstream::out);
+	out << "Title,Number of Units,Quarter\n";
+	for (auto [a,b,c] : unlisted_courses) {
+		out << a <<","<<b<<","<<c<<"\n";
+	}
  }
  
  int main() {
@@ -130,10 +146,10 @@
    parse_csv("courses.csv", courses);
  
    /* Uncomment for debugging... */
-   // print_courses(courses);
+//    print_courses(courses);
  
    write_courses_offered(courses);
    write_courses_not_offered(courses);
- 
+
    return run_autograder();
  }

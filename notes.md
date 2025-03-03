@@ -258,3 +258,104 @@ auto f(string& a) {
 ```
 
 比较需要注意的是，在 C++ 中尽量少用 C 风格字符串。在 lambda 函数，自动推导 `iterator`，定义 `templates` 中我们经常用到 auto.
+
+# L3-Sequences Containers
+
+
+### `pair`
+
+`pair` 是一个可以储存两个对象的元组。从 C++17 开始，C++ 本身支持了 structured bindings.我们可以通过 `make_pair` 自动推导一个对应的二元组。当然也可以利用 `auto` 自动推导：
+
+```cpp
+auto p = make_pair(1.28,"abc"); //返回的是一个 pair<double,string>
+auto [a,b] = p;// a 为 double 类型，b 为 string 类型。
+```
+
+### `struct`
+
+`struct` 本身是一个更为强大的元组，可以任意储存多种类型的对象。并且每个对象是具有名称的，不需要再用 `first,second` 来写了。
+
+```cpp
+struct Time {
+    double timestamp;
+};
+
+struct Course {
+    Time start,end;
+    string name;
+    vector <string> students;
+};
+```
+
+`struct` 是 `class` 的一种轻量级形式，可以说我们不涉及 `private/public` 的内容。
+
+当然我们依然可以利用结构化绑定(structured bindings)来简化代码：
+
+```cpp
+struct node {
+    int l,r;
+};
+
+node Construct_node(int l,int r) {
+    return node{l,r};
+}
+```
+
+### 初始化
+
+C++11 开始支持了一种统一初始化：
+
+```cpp
+int main() {
+    vector <int> pi{3,1,4,1,5,9};
+}
+```
+
+对于自定义的 `struct` 来说也很适合，你可以按照 `struct` 里面定义的顺序来初始化一个东西。注意对于 0 初始化来说，我们一般只认为对全局变量或者某些东西你可以依赖 C++ 进行空初始化，对于其他情况尽量不要依赖 C++.举个例子，对于 `std::vector` 来说，他在构造函数里有指定某个类型的默认值，所以新定义 `std::vector` 你可以相信！
+
+## 序列容器
+
+是容器的子集，容器又是 STL 的一方面东西。
+
+```cpp
+std::vector <T>
+std::deque <T>
+std::list <T>
+std::array <T>
+std::forward_list <T>
+```
+
+### `vector`
+
+可以使用任意类型定义的线性容器。
+
+| 基本方法 | `std::vector<int>`|
+|:---:|:---:|
+|创建新 vector| `vector <int> v;`|
+|创建新 vector，长度为 n| `vector <int> v(n);`|
+|创建新 vector，长度为 n，值为 k| `vector <int> v(n,k);`|
+|添加新元素| `v.push_back(k);`|
+|清空| `v.clear()`|
+|获取下标元素| `v.at(i);v[i];`|
+
+注意，使用 `at(i)` 的时候可以丢出错误 `out_of_range`，但是用中括号就没有了。
+
+### `deque`
+
+注意到 `vector` 实际上不支持 `push_front` 操作，或者说这样做的操作效率很低。我们使用 `deque` 来实现一个可以在双端插入删除的东西。但是请注意，在同样操作下 `deque` 的效率总是比 `vector` 低的！
+
+## STL
+
+先来点现代 C++ 的三体人震撼：
+
+```cpp
+int main() {
+    int n = 15;
+    vector <int> vec(n);
+    generate(vec.begin(),vec.end(),rand);
+    sort(vec.begin(),vec.end());
+    copy(vec.begin(),vec.end(),ostream_iterator<int>(cout,"\n"));
+}
+```
+
+这个代码实现了自动生成 n 个整数并且排序输出的功能，太无敌了。

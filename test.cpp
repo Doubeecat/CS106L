@@ -25,13 +25,13 @@ int StringToInterger(const string &s) {
     PrintStateBits(iss);
     return number;
 }
+
 int main() {
-    int var1;
-    ifstream in("in.txt",ifstream::in);
-    ofstream out("out.txt",ofstream::out);
-    in >> var1;
-    out << var1;
-    return 0;
+    int n = 15;
+    vector <int> vec(n);
+    generate(vec.begin(),vec.end(),rand);
+    sort(vec.begin(),vec.end());
+    copy(vec.begin(),vec.end(),ostream_iterator<int>(cout,"\n"));
 }
 
 /*

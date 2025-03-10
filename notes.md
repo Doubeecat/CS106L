@@ -338,7 +338,7 @@ std::forward_list <T>
 |清空| `v.clear()`|
 |获取下标元素| `v.at(i);v[i];`|
 
-注意，使用 `at(i)` 的时候可以丢出错误 `out_of_range`，但是用中括号就没有了。
+注意，使用 `at(i)` 的时候可以丢出错误 `out_of_range`，但是用中括号就没有了，如果超出范围实际上是一个 undefined behavior。
 
 ### `deque`
 
@@ -359,3 +359,52 @@ int main() {
 ```
 
 这个代码实现了自动生成 n 个整数并且排序输出的功能，太无敌了。
+
+# L4-Associative Containers & Iterators
+
+## Container Adaptor
+
+STL 库里给我们提供了很多常用数据结构的封装完毕的实现！比如 `std::stack,std::queue`，这俩东西实际上是 `vector,deque` 只允许在某一端进行操作的实现。
+
+因为这个原因，所以这俩都被称为**容器适配器(container adaptor)**.就是这俩实际上的实现是把 `vector,deque` 给封装成了其他东西。在声明的时候如果你喜欢给他任意一个满足需求的容器都可以。
+
+为什么要有容器适配器？这就来到了设计 C++ 的哲学之一：直接在代码中表达自己的意图。
+ 
+## Associative Containers
+
+关联容器是一种没有序列概念的数据类型，数据以键值类储存。
+
+```cpp
+std::map<T1,T2>
+std::set<T>
+std::unordered_map<T1,T2>
+std::unordered_set<T>
+```
+
+前两个是基于顺序排序的储存，所以键值类型必须支持小于号。后两个必须实现 `hash` 函数。所以 `map,set` 在遍历连续的一段区间时显著快，后两者在随机访问中显著快。
+
+```cpp
+std::map <string,int> freq;
+string word;
+freq[word]++;
+freq.get(word);//如果不存在则会抛出错误
+int a = freq[word];//如果不存在则会新建一个 (word,0) 的元组
+freq.count(word);//这个返回0/1 代表是否存在
+```
+
+## Iterators
+
+太超模了，这才是新时代 C++！
+
+迭代器允许我们遍历任意容器，无论其是否有序。提供了一种以线性方式遍历容器的方法。
+
+迭代器的类型取决于使用的数据结构的类型，我们可以对一个迭代器类型进行 `++` 的操作，以及使用 `*` 解引用。每个容器都有 `.begin(),.end()` 两个迭代器。比如：
+
+```cpp
+set <int>::iterator iter = mySet.begin();
+for (;iter != mySet.end();++iter) {
+    cout << *iter << "\n";
+}
+```
+
+当然实际上由于我们现在有了 auto，我们也可以让 auto 直接推导。

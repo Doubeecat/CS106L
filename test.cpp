@@ -26,13 +26,23 @@ int StringToInterger(const string &s) {
     return number;
 }
 
-int main() {
-    int n = 15;
-    vector <int> vec(n);
-    generate(vec.begin(),vec.end(),rand);
-    sort(vec.begin(),vec.end());
-    copy(vec.begin(),vec.end(),ostream_iterator<int>(cout,"\n"));
+void swap(char *s1,char *s2) {
+    char t;
+    t = *s1;
+    *s1 = *s2;
+    *s2 = t;
 }
+
+int main() {
+    char *s1 = "BD",*s2 = "BC",*s3 = "AB";
+    cout << s1 << " 23" << s2 << " " << s3;
+    if (strcmp(s1,s2) > 0) swap(s1,s2);
+    cout << s1 << " " << s2 << " " << s3 <<"\n";
+    if (strcmp(s2,s3) > 0) swap(s2,s3);
+    cout << s1 << " " << s2 << " " << s3 << "\n";
+    if (strcmp(s1,s2) > 0) swap(s1,s2);
+    cout << s1 << " " << s2 << " " << s3;
+}   
 
 /*
 1

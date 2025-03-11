@@ -408,3 +408,28 @@ for (;iter != mySet.end();++iter) {
 ```
 
 当然实际上由于我们现在有了 auto，我们也可以让 auto 直接推导。
+
+### Map iterator
+
+对于 map 的迭代器来说，我们使用的是 `std::pair` 来储存。而且注意到 `make_pair` 的时候，实际上是自动化地决定类型，所以这就是很好的使用 auto 的机会。
+
+```cpp
+auto p = make_pair("114514",1919810);
+```
+
+而 `map` 的迭代器实际上是一个 `pair<T1,T2>` 的东西，我们可以这样遍历：
+
+```cpp
+map <int,int>::iterator iter = m.begin();
+for (;iter != m.end();++iter) {
+    cout << (*iter).first << " " << (*iter).second << "\n";
+}
+```
+
+当然由于 `auto` 的存在，我们可以使用更加牛逼也简单 的遍历方法：
+
+```cpp
+for (auto e : m) {
+    cout << e.first << " " << e.second << endl;
+}
+```

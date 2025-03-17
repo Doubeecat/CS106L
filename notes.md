@@ -360,7 +360,7 @@ int main() {
 
 这个代码实现了自动生成 n 个整数并且排序输出的功能，太无敌了。
 
-# L4-Associative Containers & Iterators
+# L4&5-Associative Containers & Iterators
 
 ## Container Adaptor
 
@@ -433,3 +433,65 @@ for (auto e : m) {
     cout << e.first << " " << e.second << endl;
 }
 ```
+### iterator-based loop
+使用 iterator 的好处在于，我们可以在两个迭代器之间遍历，省掉了具体知道哪个位置的复杂度。比如我们现在想要查询 `lower_bound` 和 `upper_bound` 之间的所有数，我们可以这么写：
+
+```cpp
+std::set <int> s = {3,1,4,1,5,9,2,6};
+int x = 1;
+std::set <int>::iterator st = lower_bound(s.begin(),s.end(),x);
+std::set <int>::iterator ed = upper_bound(s.begin(),s.end(),x);
+cout << *st << " " << *ed << "\n";
+for (auto iter = st;iter != ed;++iter) {
+    cout << *iter;
+}
+console: 
+1 2
+1
+```
+
+这里有一些遍历的表:
+
+||$[a,b]$|$[a,b)$|$(a,b]$|$(a,b)$|
+|---|---|---|---|---|
+|begin|lower_bound(a)|lower_bound(a)|upper_bound(a)|upper_bound(a)|
+|end|upper_bound(b)|lower_bound(b)|upper_bound(b)|lower_bound(b)|
+
+迭代器最大的意义也就在这：它支持我们以一个固定的逻辑形式，遍历不同的数据结构。在后面我们可以把它和 `template` 结合起来。
+
+# L6&7-Templates
+
+## 隐式函数
+
+对于不同的数据类型，我们想要使用同样的一套函数形式处理不同的类型。在 C 语言中我们可能会对所有类型都写一遍，但是实际上我们可以用 template 来做！
+
+template 的本质是我们使用一个统一的类型来编写函数，比如：
+```cpp
+template <typename T>//先声明模板类型为 T
+pair<T,T> my_minmax(T a,T b) {
+    if (a < b) return {a,b};
+    else return {b,a};
+}
+
+pair <double,double> p1 = my_minmax(1.2,3.2);
+cout << p1.first << p1.second;
+pair <string,string> p2 = my_minmax("a","b");
+cout << p2.first << p2.second;
+```
+
+我们可以指定一下 template 方法的类型，利用尖括号声明类型。例如：
+
+```cpp
+auto [min1,max1] = my_minmax<double>(1.2,3.2);
+auto [min2,max2] = my_minmax<string>("Doubee","cat");
+```
+
+回顾一下我们的 STL 定义，实际上我们用类似 `vector <int> vec;` 的定义时候就在明确类型，vector 实际上也是一个 template 的对象。好玩的是，`T` 类型的指定实际上是在编译时就完成了，所以编译完的函数和我们最朴素定义是等价的。
+
+如果我们想指定多个不同的模板类型，我们可以这么写：
+```cpp
+template <typename T,typename U>
+```
+然后正常使用 T 和 U 即可。 
+
+## 

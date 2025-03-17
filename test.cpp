@@ -33,15 +33,17 @@ void swap(char *s1,char *s2) {
     *s2 = t;
 }
 
+template <typename T>//先声明模板类型为 T
+pair<T,T> my_minmax(T a,T b) {
+    if (a < b) return {a,b};
+    else return {b,a};
+}
+
 int main() {
-    char *s1 = "BD",*s2 = "BC",*s3 = "AB";
-    cout << s1 << " 23" << s2 << " " << s3;
-    if (strcmp(s1,s2) > 0) swap(s1,s2);
-    cout << s1 << " " << s2 << " " << s3 <<"\n";
-    if (strcmp(s2,s3) > 0) swap(s2,s3);
-    cout << s1 << " " << s2 << " " << s3 << "\n";
-    if (strcmp(s1,s2) > 0) swap(s1,s2);
-    cout << s1 << " " << s2 << " " << s3;
+pair <double,double> p1 = my_minmax(1.2,3.2);
+cout << p1.first << p1.second;
+pair <string,string> p2 = my_minmax("a","b");
+cout << p2.first << p2.second;
 }   
 
 /*

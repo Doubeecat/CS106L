@@ -494,4 +494,181 @@ template <typename T,typename U>
 ```
 然后正常使用 T 和 U 即可。 
 
-## 
+# L8 - Classes & objects
+
+## 类
+
+类(class)为我们提供了存取新对象的模板，如果我们想引入新的东西到程序里，我们肯定需要编写一个 class。
+
+组成类的部分分成以下几部分：
+- 成员变量(member variables)：每一个对象都具有成员变量的一份拷贝
+- 成员函数(member functions)：每个成员函数可以和成员变量进行交互。用 `obj.fun()` 进行交互
+- 构造器(constructor)：每个对象最开始是没有东西的，需要通过构造函数对其进行初始化。
+
+C++ 中我们把类分为两种文件：
+- `.h` 包含了所有在类中出现的实体的，带分号的原型声明，也就是 `header`
+- `.cpp` 包含了所有方法的具体实现。
+
+### 定义
+
+.h 文件一般长这样：
+
+```cpp
+#ifndef _BankAccount_h
+#define _BankAccount_h
+//上面这个文件是被包含两次的
+
+class BankAccount {
+    public:
+        BankAccount(string name,double val);//constructors 
+        void deposit(double amount);// member functions
+        void withdraw(double amount);
+    private:
+        string name;//member variables
+        double balance;
+};
+
+#endif
+```
+
+一个东西设为 `public` 代表可以从外部访问，`private` 代表仅可以从内部访问。`private` 很重要，因为我们很多时候不希望外部函数直接修改变量。举个例子：我肯定不希望别人直接修改我的银行卡余额，但是让银行系统修改银行卡余额是对的（）
+
+在 `.h` 文件中我们给出了定义，在 `.cpp` 文件中我们类似于直接调用客户端一样的进行书写。
+
+```cpp
+account::account(string n,double bal) {
+    if (bal < 0) throw bal;
+    name = n;
+    val = bal;
+}
+
+void account::withdraw(double amount){
+    if (val >= amount) {
+        val -= amount;
+    }
+}
+
+void account::debug() {
+    cerr << "name:" << name << "\n";
+    cerr << "val:" << val << "\n";
+}
+
+int main() {
+    string name = "cat";
+    account a(name,1.0);
+    a.debug();
+    a.withdraw(0.5);
+    a.debug();
+}   
+```
+
+如果需要定义成员函数我们这么写(in .cpp)，注意此时 .h 中一定要有对应的定义才能写，但是注意如果是构造函数，前面不写 return type:
+
+```cpp
+#include "ClassName.h"
+
+returnType ClassName::methodName(parameters) {
+    statements;
+}
+```
+
+唯一的不同在于我们写一个函数前面需要有 `ClassName::`,并且这函数在 `.h` 中有预先定义。简单理解就是 .h 可以理解为 API。   
+
+我们设计一个东西为 private 的时候，需要考虑每个函数对他的访问是什么形态的：
+
+我们可以让方法对一个变量只读，也就是访问器 (accessors)。可以允许终端去只写，也就是 mutatar.
+
+### 析构函数(Destructor)
+
+当一个对象被程序删除（比如代码结束的时候，或者调用 `delete`）调用的函数。一般写成这样：
+```cpp
+// spec1_destructors.cpp
+#include <string> // strlen()
+
+class String
+{
+    public:
+        String(const char* ch);  // Declare the constructor
+        ~String();               // Declare the destructor
+    private:
+        char* _text{nullptr};
+};
+
+// Define the constructor
+String::String(const char* ch)
+{
+    size_t sizeOfText = strlen(ch) + 1; // +1 to account for trailing NULL
+
+    // Dynamically allocate the correct amount of memory.
+    _text = new char[sizeOfText];
+
+    // If the allocation succeeds, copy the initialization string.
+    if (_text)
+    {
+        strcpy_s(_text, sizeOfText, ch);
+    }
+}
+
+// Define the destructor.
+String::~String()
+{
+    // Deallocate the memory that was previously reserved for the string.
+    delete[] _text;
+}
+
+int main()
+{
+    String str("We love C++");
+}
+```
+
+## `const`
+
+为什么使用 const？如果我们使用全局变量，那么全局变量可以在任意地方都被修改，很难去记住为什么使用它，并且这是不安全的！
+
+很多时候，我们不希望我们引入的参数被修改，在函数参数中使用 `const` 可以帮助我们使得函数只读。
+
+例如这个：
+
+```cpp
+int f(const int &x) {
+    solve(x);//在这个操作之后 x 依然不变
+}
+```
+
+const 类也是可以的，但是如果我们的调用了一个 const 的成员函数，那么只能以 const 的作用调用对象。
+
+```cpp
+struct Planet {
+    int countPopulation() const;
+    void Deathstar();
+};
+
+void destroy(const Planet &p) {
+    cout << p.countPopulation() << endl;
+    //第一个是可以的
+    p.Deathstar();
+    //最后一个是不行的，因为 Deathstar 不是 const 函数
+}
+```
+
+还有 const 指针，比如：
+```
+int * const p;
+```
+
+对这个指针执行 `(*p)++` 是可以的，因为相当于先对指针解引用了，但是执行 `p++` 就不可以了。
+
+注意区分，我们还有一个非 const 指针对 const 变量的引用，总之这些东西就是套娃来去，搞明白 const 约束的是变量本身还是指针就 OK。
+
+让我们看看 const 迭代器是什么，其实本质上和指针一样，如果我们想要一个迭代器只读，我们直接 `const vector <int>::iterator itr`，同样的对于 `++itr` 是无法编译，但是 `*itr = 6` 可以正确赋值。但是要注意，我们还有一种 `const_iterator`：
+
+```cpp
+const vector <int>::iterator itr = v.begin();
+*itr = 5;//合法的，不能改变迭代器本身，但是可以改变迭代器对应的值
+++itr;//不合法
+
+vector <int> const_iterator itr = v.begin();
+*itr = 5;//这样就寄了
+++itr;//合法
+```

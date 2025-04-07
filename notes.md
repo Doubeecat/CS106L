@@ -672,3 +672,21 @@ vector <int> const_iterator itr = v.begin();
 *itr = 5;//这样就寄了
 ++itr;//合法
 ```
+
+# L9 - Operators
+
+我们先来分析一段程序，观察一下 C++ 在实际过程中进行了什么：
+
+```cpp
+vector <string> v{"seven","august"};
+cout << v[0];
+v[1] += "!";
+```
+
+它等价于
+
+```cpp
+vector <string> v{"seven","august"};
+cout.operator << (v.operator[](0));
+v.operator[](1).operator += ("!");
+```

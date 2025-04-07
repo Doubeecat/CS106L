@@ -96,5 +96,6 @@
         "stdfloat": "cpp",
         "text_encoding": "cpp"
     },
-    "workbench.editor.wrapTabs": true
+    "workbench.editor.wrapTabs": true,
+    "C_Cpp.errorSquiggles": "disabled"
 }

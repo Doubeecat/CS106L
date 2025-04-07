@@ -690,3 +690,130 @@ vector <string> v{"seven","august"};
 cout.operator << (v.operator[](0));
 v.operator[](1).operator += ("!");
 ```
+
+对于 `<<` 来说，我们应当手写对于每个类型的 <<，令编译器知道我们如何运行。
+
+我们可以通过手写一个分数类来展示一下：参见仓库里的 `fraction.h`
+
+```cpp
+//fraction.h
+#include <iostream>
+using namespace std;
+#ifndef _fraction_h
+#define _fraction_h
+
+class fraction {
+    public:
+        fraction(){};
+        fraction(int a,int b):base(a),frac(b){};
+        fraction operator + (const fraction &a);
+        fraction operator + (const int &a);
+        fraction operator - (const fraction &a);
+        fraction operator * (const fraction &a);
+        fraction operator / (const fraction &a);
+        fraction& operator += (const fraction &a);
+        fraction& operator -= (const fraction &a);
+        fraction& operator = (const fraction &a);
+        
+    private:
+        int base,frac;
+        friend ostream& operator << (ostream &os,const fraction &a);
+};
+
+
+#endif
+```
+
+```cpp
+//fraction.cpp
+/*
+Undo the destiny.
+*/
+#include <bits/stdc++.h>
+#include "fraction.h"
+using namespace std;
+#define ll long long
+fraction fraction::operator + (const fraction &a) {
+    int newbase = base * a.base;
+    int newfrac = a.base * frac + base * a.frac;
+    int g = __gcd(newbase,newfrac);
+    return fraction(newbase/g,newfrac/g);
+}
+fraction fraction::operator + (const int &a) {
+    int newbase = base;
+    int newfrac = frac + a * base;
+    int g = __gcd(newbase,newfrac);
+    return fraction(newbase/g,newfrac/g);
+}
+fraction fraction::operator - (const fraction &a) {
+    int newbase = base * a.base;
+    int newfrac = a.base * frac - base * a.frac;
+    int g = __gcd(newbase,newfrac);
+    return fraction(newbase/g,newfrac/g);
+}
+fraction fraction::operator * (const fraction &a) {
+    int newbase = base * a.base;
+    int newfrac = frac * a.frac;
+    int g = __gcd(newbase,newfrac);
+    return fraction(newbase/g,newfrac/g);
+}
+fraction fraction::operator / (const fraction &a) {
+    int newbase = base * a.frac;
+    int newfrac = frac * a.base;
+    int g = __gcd(newbase,newfrac);
+    return fraction(newbase/g,newfrac/g);
+}
+fraction& fraction::operator += (const fraction &a) {
+    
+    frac = a.base * frac + base * a.frac;
+    base *= a.base;
+    int g = __gcd(base,frac);
+    base /= g,frac /= g;
+    return *this;
+}
+fraction& fraction::operator -= (const fraction &a) {
+    
+    frac = a.base * frac - base * a.frac;
+    base *= a.base;
+    int g = __gcd(base,frac);
+    return *this;
+}
+fraction& fraction::operator = (const fraction &a){
+    base = a.base;
+    frac = a.frac;
+    return *this;
+}
+
+ostream& operator << (ostream& os,const fraction &a) {
+    os << "(" << a.frac << "/" << a.base << ")";
+    return os;
+}
+
+int main() {
+    fraction a(2,1),b(4,3),c(6,5);
+    cout << a << " " << b <<  " " << c << "\n";
+    cout << a + b;
+    cout << b + c;
+    cout << ((a += b) += c);
+}
+
+```
+
+注意我们这边在写 `+=,-=` 的时候，都用的是引用，因为我们实际上在返回的时候需要支持连续的写法，比如：
+
+```cpp
+fraction a(1,2),b(3,4),c(5,6);
+(a += b) += c;
+```
+
+如果不是引用，那么将只有第一个运算符可以正常工作。
+
+为什么 `+-*/` 需要是成员函数，但是 `<<` 只能是一个非成员函数？
+
+经验法则：
+1. 对于 `[],(),->,=` 等必须是成员函数，直接操作的是对象状态
+2. 对于 `<<,>>` 等必须为非成员函数，且最好定义为友元函数（因为很多时候没有办法正常访问他们），因为左操作数是流对象，无法添加成员函数
+3. 对于一元运算符，例如 `++,--` 必须实现为成员函数
+4. 对于二元运算符，如果对两个操作数的处理是一样的（比如 `+,<`） 那么尽量实现为非成员函数
+5. 对于二元运算符，如果对两个操作数的处理是不一样的（比如 `+=`） 那么必须实现为成员函数（对于左操作数的访问更加容易！）
+

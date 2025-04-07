@@ -2,40 +2,69 @@
 Undo the destiny.
 */
 #include <bits/stdc++.h>
+#include "fraction.h"
 using namespace std;
-#include "test.h"
 #define ll long long
-#define FO(x) {freopen(#x".in","r",stdin);freopen(#x".out","w",stdout);}
-#define pii pair<int,int>
-#define pll pair<ll,ll>
-#define mp make_pair
-const int N = 110;
-bool vis[N][N][N];
-int f[N][N][N];
-int main() {
-    for (int i = 1;i <= 10;++i) {
-        for (int j = 1;j <= 10;++j) {
-            vis[i][j][0] = 1;
-        }
-    }
-    for (int i = 1;i <= 10;++i) {
-        for (int j = 1;j <= 10;++j) {
-            for (int k = 1;k <= 10;++k) {
-                if (i == j || j == k || k == j) continue;
-                vis[i][j][k] = 1;
-                cerr << i << " " << j << " " << k << "\n";
-                cerr << i << " " << k << " " << k-1 << "\n";
-                cerr << k << " " << j << " " << k-1 << "\n";
-                assert(vis[i][k][k-1] && vis[k][j][k-1]);
-            }
-        }
-    }
+fraction fraction::operator + (const fraction &a) {
+    int newbase = base * a.base;
+    int newfrac = a.base * frac + base * a.frac;
+    int g = __gcd(newbase,newfrac);
+    return fraction(newbase/g,newfrac/g);
 }
-/*
-1
--G--
----E
-12 2
--G--
--G--
-*/
+fraction fraction::operator + (const int &a) {
+    int newbase = base;
+    int newfrac = frac + a * base;
+    int g = __gcd(newbase,newfrac);
+    return fraction(newbase/g,newfrac/g);
+}
+fraction fraction::operator - (const fraction &a) {
+    int newbase = base * a.base;
+    int newfrac = a.base * frac - base * a.frac;
+    int g = __gcd(newbase,newfrac);
+    return fraction(newbase/g,newfrac/g);
+}
+fraction fraction::operator * (const fraction &a) {
+    int newbase = base * a.base;
+    int newfrac = frac * a.frac;
+    int g = __gcd(newbase,newfrac);
+    return fraction(newbase/g,newfrac/g);
+}
+fraction fraction::operator / (const fraction &a) {
+    int newbase = base * a.frac;
+    int newfrac = frac * a.base;
+    int g = __gcd(newbase,newfrac);
+    return fraction(newbase/g,newfrac/g);
+}
+fraction& fraction::operator += (const fraction &a) {
+    
+    frac = a.base * frac + base * a.frac;
+    base *= a.base;
+    int g = __gcd(base,frac);
+    base /= g,frac /= g;
+    return *this;
+}
+fraction& fraction::operator -= (const fraction &a) {
+    
+    frac = a.base * frac - base * a.frac;
+    base *= a.base;
+    int g = __gcd(base,frac);
+    return *this;
+}
+fraction& fraction::operator = (const fraction &a){
+    base = a.base;
+    frac = a.frac;
+    return *this;
+}
+
+ostream& operator << (ostream& os,const fraction &a) {
+    os << "(" << a.frac << "/" << a.base << ")";
+    return os;
+}
+
+int main() {
+    fraction a(2,1),b(4,3),c(6,5);
+    cout << a << " " << b <<  " " << c << "\n";
+    cout << a + b;
+    cout << b + c;
+    cout << ((a += b) += c);
+}

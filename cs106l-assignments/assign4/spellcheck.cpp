@@ -12,7 +12,9 @@ std::vector<Iterator> find_all(Iterator begin, Iterator end, UnaryPred pred);
 
 Corpus tokenize(const std::string& source) {
   /* TODO: Implement this method */
-  return Corpus();
+  Corpus tokens;
+  std::vector <std::string::const_iterator> vec = find_all(source.begin(),source.end(),::isspace);
+  return Corpus(tokens);
 }
 
 std::set<Mispelling> spellcheck(const Corpus& source, const Dictionary& dictionary) {

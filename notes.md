@@ -1023,7 +1023,7 @@ StringVector::StringVector(StringVector && other):elems(std::move(other.elems)),
 }
 ```
 
-而这实际上也优化了程序运行效率，因为在移动赋值中，我们不需要新建一个拷贝。例如我们可以写出来一个高效的 `swap`：
+而这实际上也优化了程序运行效率，因为在移动赋值中，我们不需要新建一个拷贝。例如我们可以写出来一个高效的 `swap`，而这对于某些类类型是尤其重要的（例如 `std::vector`）：
 
 ```cpp
 template<typename T>
@@ -1033,3 +1033,4 @@ void swap(T& a,T& b){
     b = std::move(temp);
 }
 ```
+

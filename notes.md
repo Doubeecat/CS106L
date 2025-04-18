@@ -494,7 +494,12 @@ template <typename T,typename U>
 ```
 然后正常使用 T 和 U 即可。 
 
-# L8 - Classes & objects
+# L8 - Functions and Algorithms
+# L9 - STL
+
+这两节之后有空再补（）因为笔者对这两块了解比较多
+
+# L10 - Classes & objects
 
 ## 类
 
@@ -673,7 +678,7 @@ vector <int> const_iterator itr = v.begin();
 ++itr;//合法
 ```
 
-# L9 - Operators
+# L11 - Operators
 
 我们先来分析一段程序，观察一下 C++ 在实际过程中进行了什么：
 
@@ -833,7 +838,7 @@ c = operator + (a,b);
 4. 对于二元运算符，如果对两个操作数的处理是一样的（比如 `+,<`） 那么尽量实现为非成员函数，这样两边操作数地位更加对称 
 5. 对于二元运算符，如果对两个操作数的处理是不一样的（比如 `+=`） 那么必须实现为成员函数（对于左操作数的访问更加容易！）
 
-# L10 - Special Member Funtions
+# L12 - Special Member Funtions
 
 在实现二元成员运算符的时候，最好把运算符实现为非成员函数。例如 `+`，这样对对象两边的处理才是对等的。
 
@@ -860,3 +865,63 @@ vector <string> operator + (const vector <string> & lhs,const vector <string> & 
 拷贝构造函数并不止需要复制某个值的表面，必须找出一个方法深拷贝他（比如对于 char[]，我们使用 memcpy 这样的，或者使用 std::copy）
 
 拷贝赋值本质上是在实现等号罢了。
+
+# L13 - Move Semantics
+
+## `emplace_back`
+
+在使用 vector 的时候，我们发现两个非常相似的函数：`emplace_back` 和  `push_back`。但是只注意到 `emplace_back` 的参数特别奇怪：
+
+> ```cpp
+> template< class... Args >
+> void emplace_back( Args&&... args );
+> (since C++11) (until C++17)
+> template< class... Args >
+> reference emplace_back( Args&&... args );
+> (since C++17)
+> (constexpr since C++20)
+> ```
+
+`Args&&... args` 比较有魅力的是，你可以丢入任意数量的参数。但是 `&&` 代表的是什么？
+
+这就是 `emplace_back` 有用的一点了，譬如我们在 `push_back` 一个对象的时候，会首先创建一个向量的拷贝，然后再把这个拷贝给丢进去。而 `emplace_back` 允许我们直接把构造一个对象的各种参数丢进去，然后直接创建这个对象。只要我们在每次插入的时候确保所有构造函数中的参数都被满足即可。可以参考 [Cppreference 中的代码](https://en.cppreference.com/w/cpp/container/vector/emplace_back)
+
+
+```cpp
+#include <vector>
+#include <cassert>
+#include <iostream>
+#include <string>
+ 
+struct President
+{
+    std::string name;
+    std::string country;
+    int year;
+ 
+    President(std::string p_name, std::string p_country, int p_year)
+        : name(std::move(p_name)), country(std::move(p_country)), year(p_year)
+    {
+        std::cout << "I am being constructed.\n";
+    }
+ 
+    President(President&& other)
+        : name(std::move(other.name)), country(std::move(other.country)), year(other.year)
+    {
+        std::cout << "I am being moved.\n";
+    }
+ 
+    President& operator=(const President& other) = default;
+};
+ 
+int main()
+{
+    std::vector<President> elections;
+    std::cout << "emplace_back:\n";
+    auto& ref = elections.emplace_back("Nelson Mandela", "South Africa", 1994);
+ 
+    std::vector<President> reElections;
+    std::cout << "\npush_back:\n";
+    reElections.push_back(President("Franklin Delano Roosevelt", "the USA", 1936));
+}
+```

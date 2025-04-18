@@ -862,7 +862,36 @@ vector <string> operator + (const vector <string> & lhs,const vector <string> & 
 
 如果没有手写拷贝构造函数的时候，编译器会帮助我们生成一个构造函数。但是比如我们的类中含有指针的话，编译器的构造函数只会帮我们复制指针本身，并不会更深地把指针对应的东西拷贝过去。
 
-拷贝构造函数并不止需要复制某个值的表面，必须找出一个方法深拷贝他（比如对于 char[]，我们使用 memcpy 这样的，或者使用 std::copy）
+拷贝构造函数并不止需要复制某个值的表面（比如单纯复制指针的地址），必须找出一个方法深拷贝他（比如对于 char[]，我们使用 memcpy 这样的，或者使用 std::copy）例如我们这里可以实现一个对于 `StringVector` 类的解析与析构函数：
+
+```cpp
+StringVector::StringVector() :
+    _logicalSize(0),_allocatedSize(kInitialSize) {
+    _elems = new ValueType[_allocatedSize];
+}
+
+//这里巧妙使用了初始化列表捏
+
+StringVector::~StringVector() {
+    delete _elems;    
+}
+
+StringVector::StringVector(const StringVector & other)  :_logicalSize(other._logicalSize),_allocatedSize(other._allocatedSize) {
+    _elems = new ValueType[_allocatedSize];
+    std::copy(other.begin(),other.end(),begin());
+}
+
+StringVector& StringVector::operator=(const StringVector & rhs) {
+    if (this != rhs) {
+        delete [] _elems;
+        _logicalSize = rhs._logicalSize;
+        _allocatedSize = rhs._allocatedSize;
+        _elems = new ValueType[_allocatedSize];    
+        std::copy(rhs.begin(),rhs.end(),begin());
+    }
+    return *this;
+}
+```
 
 拷贝赋值本质上是在实现等号罢了。
 
@@ -892,7 +921,7 @@ vector <string> operator + (const vector <string> & lhs,const vector <string> & 
 #include <cassert>
 #include <iostream>
 #include <string>
- 
+
 struct President
 {
     std::string name;
@@ -923,5 +952,84 @@ int main()
     std::vector<President> reElections;
     std::cout << "\npush_back:\n";
     reElections.push_back(President("Franklin Delano Roosevelt", "the USA", 1936));
+}
+```
+
+## 复制问题
+
+我们来分析以下下面这个代码：
+
+
+```cpp
+#include <iostream>
+#include "StrVector.h"
+using namespace std;
+StrVector readNames(size_t size) {
+    StrVector names(size,"cat");
+    return names;
+}
+
+int main() {
+    StrVector name1 = readNames(114514);
+    StrVector name2;
+    name2 = readNames(1919810);
+}
+
+```
+
+首先在每个 `readNames` 中，构造每个 names 用了填充构造函数，并且在 `return names;` 的时候创建了一个拷贝，这里用的是拷贝构造函数，最后又调用了析构函数，消除了每个在函数中构造的 names.
+
+在 `main()` 的几个等号中，我们用的都是拷贝构造函数。并且在每个调用 `readNames` 结束后我们都销毁了对应的对象。
+
+## 左值与右值
+
+定义：l-value（左值）是一个具有名字的表达式，可以由取右值得到。r-value（右值）是一个没有名字的表达式，作为临时变量，并且无法寻得地址。
+
+还有一个概念是左值引用与右值引用，左值引用即 `type & it`，，右值引用则是 `type && it`：
+
+```cpp
+int val = 2;
+int* ptr = 0x3f3f3f3f;
+vector <int> v1{1,2,3};
+
+auto &ptr2 = ptr;
+auto && v4 = v1 + v2;
+```
+
+这里的 `ptr2` 就是左值引用，`v4` 是右值引用。我们不能绑定一个右值到左值引用上，例如这样：
+
+```cpp
+auto& ptr3 = &val;
+```
+
+同理，我们不能绑定一个右值引用到左值上，例如：
+
+```cpp
+auto &&val2 = val;
+```
+
+## 移动操作
+
+这一部分将设计两个新的特殊成员函数：移动构造函数和移动赋值函数。二者都是对于右值操作的。
+
+在很多情况我们编写移动赋值的时候，如果我们直接用 `=` 会造成什么问题？因为我们对应的对象是右值，所以实际上资源所有权未转移，只会复制指针值（也就是进行浅拷贝）
+
+我们一般用的是 `std::move` 来规避这种问题。例如：
+
+```cpp
+StringVector::StringVector(StringVector && other):elems(std::move(other.elems)),logicalsize(std::move(other.logicalsize)),allocatedsize(std::move(other.allocatedsize))
+{
+    other.elems = nullptr;
+}
+```
+
+而这实际上也优化了程序运行效率，因为在移动赋值中，我们不需要新建一个拷贝。例如我们可以写出来一个高效的 `swap`：
+
+```cpp
+template<typename T>
+void swap(T& a,T& b){
+    T temp = std::move(a);
+    a = std::move(b);
+    b = std::move(temp);
 }
 ```

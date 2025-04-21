@@ -199,6 +199,10 @@ getline(cin,str);
 
 `getline` 函数返回的是 `bool`，指示我们的操作是否成功。基于此我们可以写出一个新的更加完备的 `getInteger()`
 
+upd:实际上 getline 返回的是传入的输出流对象本身的引用，之所以返回值能被用在 bool 求值语境下，是因为 std::cin 提供了一个 operator bool 类型转换函数，这个函数会在合适的语境下将 std::cin 本身转换为一个 bool 值。（感谢知乎评论区的“用户”朋友！）
+
+
+
 ```cpp
 int getInterget() {
     while (1) {
@@ -1034,3 +1038,74 @@ void swap(T& a,T& b){
 }
 ```
 
+并且额外注意的一点是，我们在赋值操作之前需要检查这是否是自我赋值，具体体现在：
+
+```cpp
+T& operator = (const T & other) {
+    if (this != &other) {
+        //do sth
+    }
+}
+```
+
+# L14 - Inheritance
+
+## namespaces（命名空间）
+
+其实我们之前使用的 `vector::,std::` 都是在对应的命名空间下进行，这也不难解释我们为什么用 `using namespace std;` 在许多竞赛代码下（）
+
+C++ 中，许多函数在不同的库中有不同实现，如果我们不加以区分其实根本不知道我们用的究竟是哪个函数（）甚至会产生编译错误，这就是命名空间存在的必要性。相当于划分领域。使用方法也很简单
+
+```cpp
+namespace Lecture {
+    int count(const vector <int> &v) {
+        int cnt = 0;
+        for (auto x : v) {
+            if (x == 1) ++cnt;
+        }
+        return cnt;
+    }
+}
+```
+
+这也正是我们在 .cpp 里编写成员函数时候会用 `classx::`
+
+## Inheritance（继承）
+
+对于所有面向对象的过程语言来说，我们都具有继承和接口的概念。接口是 C++ 中最简单的继承形式。例如：
+
+```cpp
+class Drink {
+    public:
+        virtual void make() = 0;
+}
+
+class Tea:public Drink {
+    public:
+        void make() {
+            //do sth;
+        }
+};
+```
+
+这里涉及了一个新概念，即虚函数。虚函数用 `virtual` 关键字修饰，在最开始仅有一个 `=0` 的参数，这样也被称为纯虚函数。
+
+而等于 0 的作用是：强制**任意**继承该类的类必须实现一个 `make()`，否则不视为一个真正的类。
+
+另外值得注意的是，我们使用 `:public Drink`，以 public 来修饰 Drink。这代表我们把 Drink 中元贝的类型都按照原本的类型处理。如果使用 `protected` 那么就会把 Drink 里所有的 public 转换成 protected，用 `private` 则会变成 private.默认则是 public
+
+如果我们想定义某个函数呢？这就涉及到 **抽象类** 的概念了。
+
+## Abstract Classes（抽象类）
+
+如果一个类包含至少一个纯虚函数，这个类就被称为抽象类。抽象类不能被实例化，也就是我们没法构造一个实际的函数。
+
+```cpp
+class Drink {
+    public:
+        virtual void make() = 0;//纯虚函数
+        virtual void make2();//非纯虚函数
+        void make3() {ans = 42;};//正常函数
+}
+
+```

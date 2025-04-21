@@ -60,6 +60,14 @@ ostream& operator << (ostream& os,const fraction &a) {
     os << "(" << a.frac << "/" << a.base << ")";
     return os;
 }
+template <class T,class Container = std::vector <T> > 
+class Stack {
+    public:
+        Stack() = default;
+        ~Stack() = default;
+    private:
+        vector <T> s;
+}
 
 int main() {
     fraction a(2,1),b(4,3),c(6,5);
